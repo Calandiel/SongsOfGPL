@@ -1,7 +1,6 @@
 local JOBTYPE = require "game.raws.job_types"
 
 ---@class Need
----@field goods TradeGoodReference[]
 ---@field age_independent boolean?
 ---@field life_need boolean?
 ---@field time_to_satisfy number Represents amount of time a pop should spend to satisfy a unit of this need.
@@ -16,7 +15,7 @@ NEED = {
 	FURNITURE = 4,
 	HEALTHCARE = 5,
 	STORAGE = 6,
-	LUXURY = 7
+	LUXURY = 7,
 }
 
 NEED_NAME = {
@@ -27,61 +26,44 @@ NEED_NAME = {
 	[NEED.FURNITURE] = 'furniture',
 	[NEED.HEALTHCARE] = 'healthcare',
 	[NEED.STORAGE] = 'storage',
-	[NEED.LUXURY] = 'luxury'
+	[NEED.LUXURY] = 'luxury',
 }
 
 ---@type table<NEED, Need>
 NEEDS = {
 	[NEED.WATER] = {
-		goods = {"water", "liquors"},
 		life_need = true,
 		job_to_satisfy = JOBTYPE.FORAGER,
-		time_to_satisfy = 0.05,
+		time_to_satisfy = 0.5,
 	},
 	[NEED.FOOD] = {
-		goods = {"food", "meat", "liquors"},
 		-- age_independent = true,
 		life_need = true,
 		job_to_satisfy = JOBTYPE.FORAGER,
 		time_to_satisfy = 1.5,
 	},
 	[NEED.CLOTHING] = {
-		goods = {"hide", "leather", "clothes"},
-		job_to_satisfy = JOBTYPE.FORAGER,
-		time_to_satisfy = 0.3
+		job_to_satisfy = JOBTYPE.LABOURER,
+		time_to_satisfy = 0.5
 	},
 	[NEED.TOOLS] = {
-		goods = {
-			"blanks-flint",
-			"blanks-obsidian",
-			"tools-flint",
-			"tools-obsidian",
-			"tools-native-copper",
-			"tools-cast-copper",
-			"copper-native",
-			"copper-ore",
-		},
 		job_to_satisfy = JOBTYPE.ARTISAN,
-		time_to_satisfy = 0.3
+		time_to_satisfy = 1.0
 	},
 	[NEED.FURNITURE] = {
-		goods = {"furniture", "timber", "stone"},
-		job_to_satisfy = JOBTYPE.ARTISAN,
-		time_to_satisfy = 0.3
+		job_to_satisfy = JOBTYPE.LABOURER,
+		time_to_satisfy = 2.0
 	},
 	[NEED.HEALTHCARE] = {
-		goods = {"healthcare"},
 		job_to_satisfy = JOBTYPE.CLERK,
-		time_to_satisfy = 0.3
+		time_to_satisfy = 1.0
 	},
 	[NEED.STORAGE] = {
-		goods = {"containers", "clay", "timber"},
-		job_to_satisfy = JOBTYPE.ARTISAN,
-		time_to_satisfy = 0.3
+		job_to_satisfy = JOBTYPE.LABOURER,
+		time_to_satisfy = 1.0
 	},
 	[NEED.LUXURY] = {
-		goods = {"copper-bars"},
 		job_to_satisfy = JOBTYPE.ARTISAN,
-		time_to_satisfy = 2.0
+		time_to_satisfy = 3.0
 	}
 }

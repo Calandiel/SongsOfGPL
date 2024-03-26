@@ -9,6 +9,7 @@
 ---@field savings number
 ---@field parent POP?
 ---@field children table<POP, POP>
+---@field get_need_satisfaction fun(self:POP):number,number
 ---@field life_needs_satisfaction number from 0 to 1
 ---@field basic_needs_satisfaction number from 0 to 1
 ---@field popularity table<Realm, number|nil>
@@ -21,7 +22,7 @@
 ---@field owned_buildings table <Building, Building>
 ---@field inventory table <TradeGoodReference, number?>
 ---@field price_memory table<TradeGoodReference, number?>
----@field need_satisfaction table<NEED, number>
+---@field need_satisfaction table<NEED, table<TradeGoodUseCaseReference,{consumed:number, demanded:number}>>
 ---@field leading_warband Warband?
 ---@field recruiter_for_warband Warband?
 ---@field unit_of_warband Warband?
@@ -52,6 +53,9 @@ rtab.POP.__index = rtab.POP
 ---@param character_flag boolean?
 ---@return POP
 function rtab.POP:new(race, faith, culture, female, age, home, location, character_flag)
+
+	local tabb = require "engine.table"
+
 	---@type POP
 	local r = {}
 
@@ -76,10 +80,26 @@ function rtab.POP:new(race, faith, culture, female, age, home, location, charact
 	r.price_memory = {}
 	r.children = {}
 	r.successor_of = {}
-	r.need_satisfaction = {}
 
-	r.basic_needs_satisfaction = 0
-	r.life_needs_satisfaction = 0
+	local need_satisfaction = race.male_needs
+	if female then
+		need_satisfaction = race.female_needs
+	end
+	r.need_satisfaction = tabb.accumulate(need_satisfaction, {}, function (a, need, values)
+			local age_dependant = not NEEDS[need].age_independent
+			a[need] = tabb.accumulate(values, {}, function (b, use_case, value)
+				local demand = value
+				if age_dependant then
+					demand = demand * self.get_age_multiplier(r)
+				end
+				b[use_case] = {consumed = demand / 4, demanded = demand}
+				return b
+			end)
+			return a
+		end)
+
+	r.basic_needs_satisfaction = 0.25
+	r.life_needs_satisfaction = 0.25
 
 	r.savings = 0
 	r.popularity = {}
@@ -127,6 +147,30 @@ function rtab.POP:get_age_multiplier()
 		age_multiplier = 0.9 -- elder
 	end
 	return age_multiplier
+end
+
+---@return number life_need
+---@return number basic_need
+function rtab.POP:get_need_satisfaction()
+	local total_consumed, total_demanded = 0, 0
+	local life_consumed, life_demanded = 0, 0
+	for need, cases in pairs(self.need_satisfaction) do
+		local consumed, demanded = 0, 0
+		for case, values in pairs(cases) do
+			consumed = consumed + values.consumed
+			demanded = demanded + values.demanded
+		end
+		if NEEDS[need].life_need then
+			life_consumed = life_consumed + consumed
+			life_demanded = life_demanded + demanded
+		else
+			total_consumed = total_consumed + consumed
+			total_demanded = total_demanded + demanded
+		end
+	end
+	self.life_needs_satisfaction = life_consumed / life_demanded
+	self.basic_needs_satisfaction = (total_consumed + life_consumed) / (total_demanded + life_demanded)
+	return self.life_needs_satisfaction, self.basic_needs_satisfaction
 end
 
 return rtab

@@ -29,19 +29,37 @@ function d.load()
 		base_price = 1,
 		category = "capacity",
 	}
+
 	add_use_case("administration", "administration", 1)
 	-- BASE GOODS
 	TradeGood:new {
-		name = "food",
-		description = "food",
-		icon = "high-grass.png",
-		r = 0.12,
-		g = 0.12,
-		b = 1,
+		name = "berries",
+		description = "berries",
+		icon = "berries-bowl.png",
+		r = 222 / 256,
+		g = 11 / 256,
+		b = 93 / 256,
 		category = "good",
 		base_price = 2,
 	}
-	add_use_case("food", "food", 1)
+
+	add_use_case("berries", "food", 1)
+	add_use_case("berries", "fruit", 1)
+	add_use_case("berries", "tannin", 0.5)
+
+	TradeGood:new {
+		name = "grain",
+		description = "grain",
+		icon = "wheat.png",
+		r = 245 / 256,
+		g = 222 / 256,
+		b = 179 / 256,
+		category = "good",
+		base_price = 2,
+	}
+	add_use_case("grain", "food", 1)
+	add_use_case("grain", "grain", 1)
+
 	TradeGood:new {
 		name = "honey",
 		description = "honey",
@@ -52,8 +70,10 @@ function d.load()
 		category = "good",
 		base_price = 2,
 	}
-	add_use_case("food", "food", 0.5)
+
+	add_use_case("honey", "food", 0.5)
 	add_use_case("honey", "mead-substrate", 1)
+
 	-- CRUCIAL SETTLEMENT SERVICES
 	TradeGood:new {
 		name = "water",
@@ -65,6 +85,7 @@ function d.load()
 		category = "service",
 		base_price = 0.01,
 	}
+
 	add_use_case("water", "water", 1)
 	TradeGood:new {
 		name = "healthcare",
@@ -76,6 +97,7 @@ function d.load()
 		category = "service",
 		base_price = 6,
 	}
+
 	add_use_case("healthcare", "healthcare", 1)
 	TradeGood:new {
 		name = "amenities",
@@ -88,6 +110,7 @@ function d.load()
 		base_price = 2,
 	}
 	add_use_case("amenities", "amenities", 1)
+
 	-- POP NEEDS
 	TradeGood:new {
 		name = "clothes",
@@ -98,6 +121,7 @@ function d.load()
 		b = 0.7,
 		base_price = 15,
 	}
+
 	add_use_case("clothes", "clothes", 1)
 	TradeGood:new {
 		name = "furniture",
@@ -109,6 +133,7 @@ function d.load()
 		base_price = 20,
 	}
 	add_use_case("furniture", "furniture", 1)
+
 	TradeGood:new {
 		name = "liquors",
 		description = "liquors",
@@ -119,6 +144,8 @@ function d.load()
 		base_price = 10,
 	}
 	add_use_case("liquors", "liquors", 1)
+	add_use_case("liquors", "intoxicants", 1)
+
 	TradeGood:new {
 		name = "containers",
 		description = "containers",
@@ -129,6 +156,7 @@ function d.load()
 		base_price = 7,
 	}
 	add_use_case("containers", "containers", 1)
+
 	-- TRADE GOODS
 	TradeGood:new {
 		name = "hide",
@@ -139,7 +167,10 @@ function d.load()
 		b = 0.3,
 		base_price = 4,
 	}
+	add_use_case("hide", "containers", 0.1)
+	add_use_case("hide", "clothes", 0.1)
 	add_use_case("hide", "hide", 1)
+
 	TradeGood:new {
 		name = "leather",
 		description = "leather",
@@ -149,8 +180,10 @@ function d.load()
 		b = 0.65,
 		base_price = 8,
 	}
-	add_use_case("leather", "containers", 0.1)
+	add_use_case("leather", "containers", 0.2)
+	add_use_case("leather", "clothes", 0.3)
 	add_use_case("leather", "leather", 1)
+
 	TradeGood:new {
 		name = "meat",
 		description = "meat",
@@ -160,7 +193,9 @@ function d.load()
 		b = 0.1,
 		base_price = 6,
 	}
+	add_use_case("meat", "food", 1)
 	add_use_case("meat", "meat", 1)
+
 	TradeGood:new {
 		name = "timber",
 		description = "timber",
@@ -170,8 +205,11 @@ function d.load()
 		b = 0.22,
 		base_price = 5,
 	}
+	add_use_case("timber", "tools-like", 0.1)
 	add_use_case("timber", "containers", 0.1)
 	add_use_case("timber", "timber", 1)
+	add_use_case("timber", "tannin", 1)
+	add_use_case("timber", "fuel", 1)
 
 	TradeGood:new {
 		name = "blanks-flint",
@@ -182,9 +220,8 @@ function d.load()
 		b = 0.422,
 		base_price = 6,
 	}
-
 	add_use_case("blanks-flint", "tools-like", 0.5)
-	add_use_case("blanks-flint", "blanks-flint", 1)
+	add_use_case("blanks-flint", "stone-blanks", 1)
 
 	TradeGood:new {
 		name = "blanks-obsidian",
@@ -195,65 +232,36 @@ function d.load()
 		b = 0.1,
 		base_price = 6,
 	}
-
 	add_use_case("blanks-obsidian", "tools-like", 0.4)
-	add_use_case("blanks-obsidian", "blanks-obsidian", 1)
+	add_use_case("blanks-obsidian", "stone-blanks", 1)
 
 
 	TradeGood:new {
-		name = "tools-flint",
-		description = "flint tools",
+		name = "tools-stone",
+		description = "stone tools",
 		icon = "stone-axe.png",
 		r = 0.162,
 		g = 0.141,
 		b = 0.422,
 		base_price = 8,
 	}
+	add_use_case("tools-stone", "tools-like", 1.5)
+	add_use_case("tools-stone", "tools", 1)
+	add_use_case("tools-stone", "tools-advanced", 0.3)
 
-	add_use_case("tools-flint", "tools-like", 1.5)
-	add_use_case("tools-flint", "tools", 1)
-	add_use_case("tools-flint", "tools-advanced", 0.3)
-
-	TradeGood:new {
-		name = "tools-obsidian",
-		description = "obsidian tools",
-		icon = "stone-axe.png",
-		r = 0.1,
-		g = 0.1,
-		b = 0.1,
-		base_price = 8,
-	}
-	add_use_case("tools-obsidian", "tools-like", 1.4)
-	add_use_case("tools-obsidian", "tools", 0.9)
-	add_use_case("tools-obsidian", "tools-advanced", 0.2)
 
 	TradeGood:new {
-		name = "tools-native-copper",
-		description = "native copper tools",
-		icon = "stone-axe.png",
+		name = "tools-copper",
+		description = "copper tools",
+		icon = "war-pick.png",
 		r = 0.71,
 		g = 0.25,
 		b = 0.05,
 		base_price = 8,
 	}
-
-	add_use_case("tools-native-copper", "tools-like", 3)
-	add_use_case("tools-native-copper", "tools", 2)
-	add_use_case("tools-native-copper", "tools-advanced", 1.5)
-
-	TradeGood:new {
-		name = "tools-cast-copper",
-		description = "cast copper tools",
-		icon = "stone-axe.png",
-		r = 0.71,
-		g = 0.25,
-		b = 0.05,
-		base_price = 8,
-	}
-
-	add_use_case("tools-cast-copper", "tools-like", 2)
-	add_use_case("tools-cast-copper", "tools", 1.5)
-	add_use_case("tools-cast-copper", "tools-advanced", 1)
+	add_use_case("tools-copper", "tools-like", 2)
+	add_use_case("tools-copper", "tools", 1.5)
+	add_use_case("tools-copper", "tools-advanced", 1)
 
 	TradeGood:new {
 		name = "copper-bars",
@@ -311,6 +319,7 @@ function d.load()
 		b = 0.8,
 		base_price = 2,
 	}
+	add_use_case("stone", "tools-like", 0.25)
 	add_use_case("stone", "stone", 1)
 	add_use_case("stone", "structural-material", 1)
 end

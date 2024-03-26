@@ -7,6 +7,10 @@ local uit = require "game.ui-utils"
 local ef = require "game.raws.effects.economic"
 local ev = require "game.raws.values.economical"
 
+local list_widget = require "game.scenes.game.widgets.list-widget"
+
+local noble_state = {state = nil}
+
 ---@return Rect
 local function get_main_panel()
 	local fs = ui.fullscreen()
@@ -181,7 +185,15 @@ function re.draw(gam)
 
 					local inspect = nil
 					local function render_name(rect, k, v)
-						if uit.text_button(v.name, rect) then
+						local children = tabb.size(v.children)
+						local name = v.name
+						if children > 0 then
+							name = name .. " (" .. children .. ")"
+						end
+						if v.parent then
+							name = name .. " [" .. v.parent.name .. "]"
+						end
+						if uit.text_button(name, rect) then
 							inspect = "character"
 							return v
 						end
@@ -198,9 +210,9 @@ function re.draw(gam)
 						return f
 					end
 					local noble_list = a:copy()
-					noble_list.width = ui_panel.width - ui_panel.x
+					noble_list.width = ui_panel.width
 					noble_list.height = ui_panel.height - ui_panel.y
-					local response = require "game.scenes.game.widgets.list-widget"(
+					local response = list_widget(
 						noble_list,
 						tabb.filter(realm.capitol.home_to,
 							function(a)
@@ -212,7 +224,7 @@ function re.draw(gam)
 									render_closure = function(rect, k, v)
 										require "game.scenes.game.widgets.portrait"(rect, v)
 									end,
-									width = UI_STYLE.scrollable_list_item_height,
+									width = 1,
 									value = function(k, v)
 										---@type POP
 										v = v
@@ -222,7 +234,7 @@ function re.draw(gam)
 								{
 									header = "name",
 									render_closure = render_name,
-									width = UI_STYLE.scrollable_list_item_height * 4,
+									width = 6,
 									value = function(k, v)
 										---@type POP
 										v = v
@@ -231,11 +243,26 @@ function re.draw(gam)
 									active = true
 								},
 								{
+									header = "popularity",
+									render_closure = function (rect, k, v)
+										---@type POP
+										v = v
+										ui.centered_text(uit.to_fixed_point2(v.popularity[realm] or 0), rect)
+									end,
+									width = 2,
+									value = function(k, v)
+										---@type POP
+										v = v
+										return v.popularity[realm] or 0
+									end,
+									active = true
+								},
+								{
 									header = "race",
 									render_closure = function (rect, k, v)
-										ui.right_text(v.race.name, rect)
+										ui.centered_text(v.race.name, rect)
 									end,
-									width = UI_STYLE.scrollable_list_item_height * 4,
+									width = 3,
 									value = function(k, v)
 										---@type POP
 										v = v
@@ -246,9 +273,9 @@ function re.draw(gam)
 								{
 									header = "faith",
 									render_closure = function (rect, k, v)
-										ui.right_text(v.faith.name, rect)
+										ui.centered_text(v.faith.name, rect)
 									end,
-									width = UI_STYLE.scrollable_list_item_height * 4,
+									width = 3,
 									value = function(k, v)
 										---@type POP
 										v = v
@@ -259,9 +286,9 @@ function re.draw(gam)
 								{
 									header = "culture",
 									render_closure = function (rect, k, v)
-										ui.right_text(v.culture.name, rect)
+										ui.centered_text(v.culture.name, rect)
 									end,
-									width = UI_STYLE.scrollable_list_item_height * 4,
+									width = 3,
 									value = function(k, v)
 										---@type POP
 										v = v
@@ -272,9 +299,9 @@ function re.draw(gam)
 								{
 									header = "age",
 									render_closure = function (rect, k, v)
-										ui.right_text(tostring(v.age), rect)
+										ui.centered_text(tostring(v.age), rect)
 									end,
-									width = UI_STYLE.scrollable_list_item_height * 2,
+									width = 2,
 									value = function(k, v)
 										return v.age
 									end
@@ -284,7 +311,7 @@ function re.draw(gam)
 									render_closure = function (rect, k, v)
 										ui.centered_text(pop_sex(v), rect)
 									end,
-									width = UI_STYLE.scrollable_list_item_height * 1,
+									width = 1,
 									value = function(k, v)
 										return pop_sex(v)
 									end
@@ -292,16 +319,67 @@ function re.draw(gam)
 								{
 									header = "location",
 									render_closure = render_province,
-									width = UI_STYLE.scrollable_list_item_height * 4,
+									width = 4,
 									value = function(k, v)
 										---@type POP
 										v = v
 										return v.province.name
 									end,
 									active = true
+								},
+								{
+									header = "savings",
+									render_closure = function (rect, k, v)
+										---@type POP
+										v = v
+										uit.money_entry(
+											"",
+											v.savings,
+											rect,
+											"Savings of this character. "
+											.. "Characters spend them on buying food and other commodities."
+										)
+									end,
+									width = 3,
+									value = function(k, v)
+										return v.savings
+									end
+								},
+								{
+									header = "satisfac.",
+									render_closure = function (rect, k, v)
+										---@type POP
+										v = v
+					
+										local needs_tooltip = ""
+										for need, values in pairs(v.need_satisfaction) do
+											local tooltip = ""
+											for case, value in pairs(values) do
+												if value.demanded > 0 then
+													tooltip = tooltip .. "\n  " .. case .. ": "
+														.. uit.to_fixed_point2(value.consumed) .. " / " .. uit.to_fixed_point2(value.demanded)
+														.. " (" .. uit.to_fixed_point2(value.consumed / value.demanded * 100) .. "%)"
+												end
+											end
+											if tooltip ~= "" then
+												needs_tooltip = needs_tooltip .. "\n".. NEED_NAME[need] .. ": " .. tooltip
+											end
+										end
+					
+										uit.data_entry_percentage(
+											"",
+											v.basic_needs_satisfaction,
+											rect,
+											"Satisfaction of needs of this character. \n" .. needs_tooltip
+										)
+									end,
+									width = 2,
+									value = function(k, v)
+										return v.basic_needs_satisfaction
+									end
 								}
-							}
-					)()
+							},
+					noble_state)()
 					if response then
 						if inspect == "character" then
 							gam.selected.character = response

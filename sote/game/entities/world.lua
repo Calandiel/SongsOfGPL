@@ -223,7 +223,7 @@ end
 ---Schedules an event immediately
 ---@param event string
 ---@param root Character
----@param associated_data table
+---@param associated_data table?
 function world.World:emit_immediate_event(event, root, associated_data)
 	if root == nil then
 		error("Attempt to call event for nil root")
@@ -382,6 +382,7 @@ function world.World:tick()
 		local ta = WORLD.settled_provinces_by_identifier[WORLD.current_tick_in_month]
 
 		local t = love.timer.getTime()
+		local car = require "game.ecology.carrying-capacity"
 
 		PROFILER:start_timer("vegetation")
 
@@ -393,6 +394,7 @@ function world.World:tick()
 				tile.shrub 		= tile.shrub * (1 - VEGETATION_GROWTH) + tile.ideal_shrub * VEGETATION_GROWTH
 				tile.grass 		= tile.grass * (1 - VEGETATION_GROWTH) + tile.ideal_grass * VEGETATION_GROWTH
 			end
+			car.get_province_carry_capacity(settled_province)
 		end
 
 		PROFILER:end_timer("vegetation")
@@ -413,17 +415,6 @@ function world.World:tick()
 			ta[province] = nil
 		end
 
-		PROFILER:start_timer("growth")
-
-		-- "POP" update
-		local pop_growth = require "game.society.pop-growth"
-		for _, settled_province in pairs(ta) do
-			--print("Pop growth")
-			pop_growth.growth(settled_province)
-		end
-
-		PROFILER:end_timer("growth")
-
 
 		-- "Province" update
 		local employ = require "game.economy.employment"
@@ -434,7 +425,9 @@ function world.World:tick()
 		local infrastructure = require "game.economy.province-infrastructure"
 		local research = require "game.society.research"
 		local recruit = require "game.society.recruitment"
+		local pop_growth = require "game.society.pop-growth"
 		for _, settled_province in pairs(ta) do
+
 			--print("employ")
 			PROFILER:start_timer("employ")
 			employ.run(settled_province)
@@ -453,10 +446,18 @@ function world.World:tick()
 			wealth_decay.run(settled_province)
 			infrastructure.run(settled_province)
 			research.run(settled_province)
-			recruit.run(settled_province)
+--			recruit.run(settled_province)
 			PROFILER:end_timer("province")
+			PROFILER:start_timer("growth")
+
+			-- "POP" update
+			--print("Pop growth")
+			pop_growth.growth(settled_province)
+			PROFILER:end_timer("growth")
+
 			--print("done")
 		end
+
 
 		-- "Realm" update
 		-- local decide = require "game.ai.decide"
@@ -493,6 +494,7 @@ function world.World:tick()
 					self:emit_treasury_change_effect(0, "new month")
 					self:emit_treasury_change_effect(0, "new month", true)
 				end
+
 				--print("Construct")
 				PROFILER:start_timer("realm-construct-update")
 				construct.run(realm) -- This does an internal check for "AI" control to construct buildings for the realm but we keep it here so that we can have prettier code for POPs constructing buildings instead!
@@ -510,7 +512,7 @@ function world.World:tick()
 				-- Handle events!
 				--print("Event handling")
 				events.run(realm)
-
+--[[
 				PROFILER:end_timer("realm")
 
 				PROFILER:start_timer("war")
@@ -532,8 +534,10 @@ function world.World:tick()
 				for _, target in pairs(realm.reward_flags) do
 					local warbands = realm.raiders_preparing[target]
 					local units = 0
-					for _, warband in pairs(warbands) do
-						units = units + warband:size()
+					if warbands then
+						for _, warband in pairs(warbands) do
+							units = units + warband:size()
+						end
 					end
 
 					-- with some probability, launch the raid
@@ -544,11 +548,11 @@ function world.World:tick()
 				end
 
 				PROFILER:end_timer("war")
-
+]]
 				t = love.timer.getTime()
 			end
 		end
-
+--[[
 		PROFILER:start_timer("decisions")
 
 		for _, settled_province in pairs(ta) do
@@ -560,7 +564,7 @@ function world.World:tick()
 		end
 
 		PROFILER:end_timer("decisions")
-
+]]
 	end
 
 	-- print('simulation update')

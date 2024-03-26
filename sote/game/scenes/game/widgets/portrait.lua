@@ -15,11 +15,14 @@ return function(rect, character)
         ui.style.panel_outline = {r = 255 / 255, g = 215 / 255, b = 0 / 255, a = 1}
     end
 
-    love.graphics.setLineWidth( 4 )
-    ui.panel(rect)
+	local subrect = ut.centered_square(rect)
+
+    subrect:shrink(1)
+    love.graphics.setLineWidth( 2 )
+    ui.panel(subrect)
     love.graphics.setLineWidth( 1 )
 
     ui.style.panel_outline = style
 
-    ui.image(ASSETS.get_icon(character.race.icon), rect)
+    ui.image(ASSETS.get_icon(character.race.icon), subrect)
 end

@@ -166,14 +166,14 @@ function d.load()
 		ai_weight = 20,
 	}
 	BuildingType:new {
-		name = "flint-knapping",
-		description = "flint knapping",
+		name = "tool-stone-knapping",
+		description = "stone tool knapping",
 		icon = 'stone-stack.png',
 		r = 0.3,
 		g = 1.0,
 		b = 0.5,
 		unlocked_by = tec('paleolithic-knowledge'),
-		production_method = prod('flint-knapping'),
+		production_method = prod('tool-stone-knapping'),
 		required_resource = {},
 		construction_cost = COST_WORKSHOP,
 		needed_infrastructure = 1,
@@ -210,28 +210,29 @@ function d.load()
 		ai_weight = 20,
 	}
 	BuildingType:new {
-		name = "obsidian-knapping",
-		description = "obsidian knapping",
-		icon = 'stone-stack.png',
-		r = 0.3,
-		g = 1.0,
-		b = 0.5,
-		unlocked_by = tec('paleolithic-knowledge'),
-		production_method = prod('obsidian-knapping'),
-		required_resource = {},
-		construction_cost = COST_WORKSHOP,
-		needed_infrastructure = 1,
-		ai_weight = 1,
-	}
-	BuildingType:new {
-		name = 'brewery',
-		description = 'brewery',
+		name = 'brewery-grain',
+		description = 'beer brewery',
 		icon = 'beer-stein.png',
 		r = 0.75,
 		g = 0.42,
 		b = 0.86,
 		unlocked_by = tec('basic-fermentation'),
 		production_method = prod('brewing'),
+		construction_cost = COST_WORKSHOP,
+		building_group = BUILDING_GROUP.WORKSHOP,
+		needed_infrastructure = 15,
+		ai_weight = 3.5
+	}
+
+	BuildingType:new {
+		name = 'brewery-fruit',
+		description = 'cider brewery',
+		icon = 'beer-stein.png',
+		r = 0.75,
+		g = 0.42,
+		b = 0.86,
+		unlocked_by = tec('basic-fermentation'),
+		production_method = prod('cidery'),
 		construction_cost = COST_WORKSHOP,
 		building_group = BUILDING_GROUP.WORKSHOP,
 		needed_infrastructure = 15,

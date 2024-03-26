@@ -68,24 +68,47 @@ local function header_panel(gam, tile, panel)
 		uit.NAME_MODE.ICON
 	)
 
-	local population_panel = mood_panel
-	population_panel.y = population_panel.y - population_panel.height
-	population_panel.x = population_panel.x + population_panel.width
+	local total_population_panel = mood_panel
+	total_population_panel.y = total_population_panel.y - total_population_panel.height
+	total_population_panel.x = total_population_panel.x + total_population_panel.width
 	uit.generic_number_field(
 		"minions.png",
-		tile.province:population(),
-		population_panel,
-		"Local population",
+		tile.province:total_population(),
+		total_population_panel,
+		"Total population",
+		uit.NUMBER_MODE.INTEGER,
+		uit.NAME_MODE.ICON
+	)
+	
+	local home_population_panel = total_population_panel
+	home_population_panel.y = home_population_panel.y + home_population_panel.height
+	uit.generic_number_field(
+		"village.png",
+		tile.province:total_home_population(),
+		home_population_panel,
+		"Home population",
 		uit.NUMBER_MODE.INTEGER,
 		uit.NAME_MODE.ICON
 	)
 
-	local unemployed_panel = population_panel
+	local characters_panel = home_population_panel
+	characters_panel.y = characters_panel.y - characters_panel.height
+	characters_panel.x = characters_panel.x + characters_panel.width
+	uit.generic_number_field(
+		"inner-self.png",
+		tile.province:local_characters(),
+		characters_panel,
+		"Local characters",
+		uit.NUMBER_MODE.INTEGER,
+		uit.NAME_MODE.ICON
+	)
+
+	local unemployed_panel = characters_panel
 	unemployed_panel.y = unemployed_panel.y + unemployed_panel.height
 	uit.generic_number_field(
 		"shrug.png",
 		tile.province:get_unemployment(),
-		population_panel,
+		unemployed_panel,
 		"Local unemployed population",
 		uit.NUMBER_MODE.INTEGER,
 		uit.NAME_MODE.ICON
@@ -1094,64 +1117,6 @@ function re.draw(gam)
 		:build()
 
 	gam.tile_inspector_tab = uit.tabs(gam.tile_inspector_tab, layout, tabs, 1)
-end
-
----@param gam GameScene
-function re.draw_old(gam)
-	local tt = gam.clicked_tile_id
-	local mbt = WORLD.tiles[tt]
-	if mbt ~= nil then
-		---@type Tile
-		local tile = mbt
-		if tile.province == nil then
-			return -- the world isn't fully generated... return
-		end
-
-		-- The clicked tile exists!
-		local panel = get_main_panel()
-		local base_unit = uit.BASE_HEIGHT
-
-		ui.panel(panel)
-
-		local top_bar_rect = panel:subrect(0, 0, panel.width, base_unit * 2, "left", "up")
-
-		-- All the other data (as in, tabs)
-		local ui_panel = panel:subrect(
-			0,
-			base_unit * 3,
-			panel.width,
-			panel.height - base_unit * 3,
-			"left", "up"):shrink(5)
-
-		gam.tile_inspector_tab = gam.tile_inspector_tab or "GEN"
-
-		uit.rows({
-
-			function(rect)
-				local player_character = WORLD.player_character
-				if player_character then
-					local player_realm = player_character.realm
-					if player_realm and WORLD:does_player_control_realm(player_realm) then
-						local explore_cost = player_realm:get_explore_cost(tile.province)
-						local explore_cost_string = tostring(math.floor(100 * explore_cost) / 100) .. MONEY_SYMBOL
-						if player_realm.budget.treasury > explore_cost then
-							if uit.text_button("Explore (" .. explore_cost_string .. ")", rect, "Explore this province") then
-								player_realm:explore(tile.province)
-								EconomicEffects.change_treasury(player_realm, -explore_cost, EconomicEffects.reasons.Exploration)
-								gam.refresh_map_mode()
-							end
-						else
-							if uit.text_button("Explore (n/a)", rect,
-								"Not enough funds! (" ..
-								explore_cost_string .. " needed)") then
-								--
-							end
-						end
-					end
-				end
-			end
-		}, rect)
-	end
 end
 
 return re

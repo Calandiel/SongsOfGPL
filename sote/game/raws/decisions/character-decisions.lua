@@ -259,10 +259,14 @@ local function load()
 			local realm = root.province.realm
 			local province = root.province
 			local warband = root.leading_warband
-			if office_triggers.guard_leader(root, root.province.realm) then
-				warband = realm.capitol_guard
+			if realm then
+				if office_triggers.guard_leader(root, root.province.realm) then
+					warband = realm.capitol_guard
+				end
+				if warband then
+					realm:add_patrol(province, warband)
+				end
 			end
-			realm:add_patrol(province, warband)
 		end
 	}
 
@@ -306,7 +310,7 @@ local function load()
 			local province = root.province
 			if province == nil then return end
 
-			province.mood = math.min(10, province.mood + base_gift_size / province:population() / 2)
+			province.mood = math.min(10, province.mood + base_gift_size / (province:home_characters() + province:home_population()) / 2)
 			economic_effects.change_local_wealth(province, base_gift_size, EconomicEffects.reasons.Donation)
 			economic_effects.add_pop_savings(root, -base_gift_size, EconomicEffects.reasons.Donation)
 
@@ -557,7 +561,7 @@ local function load()
 			---@type Character
 			local root = root
 
-			WORLD:emit_immediate_event('attempt-coup', root)
+			WORLD:emit_immediate_event('attempt-coup', root, nil)
 		end
 	}
 

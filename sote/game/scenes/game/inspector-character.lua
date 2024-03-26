@@ -22,6 +22,7 @@ local decision_target_secondary = nil
 local traits_slider = 0
 local inventory_slider = 0
 local character_list_tab = "Local"
+local list_widget_state = {state = nil}
 
 ---@return Rect
 function window.rect()
@@ -82,7 +83,9 @@ function window.draw(game)
             end
         end,
         UI_STYLE.scrollable_list_large_item_height,
-        tabb.size(RAWS_MANAGER.trade_goods_by_name),
+        tabb.size(tabb.filter(RAWS_MANAGER.trade_goods_by_name,function (a)
+            return character.inventory[a.name] and character.inventory[a.name] > 0 or false
+        end)),
         unit,
         inventory_slider
     )
@@ -262,11 +265,6 @@ function window.draw(game)
             if pop.female then f = "f" end
             return f
         end
-        local function render_name(rect, k, v)
-            if ut.text_button(v.name, rect) then
-                return v
-            end
-        end
         tabs[3] = {
             text = "Warriors",
             tooltip = "Warriors in the character's warband.",
@@ -334,7 +332,7 @@ function window.draw(game)
                             return pop_sex(v)
                         end
                     }
-                }, nil, true)()
+                }, list_widget_state, nil, true)()
             end
         }
     end
